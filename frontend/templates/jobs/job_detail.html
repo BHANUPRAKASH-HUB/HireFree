@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Loading State -->
+<div id="loading" class="text-center py-20">
+    <span class="animate-spin text-4xl text-accent">↻</span>
+</div>
+
+<!-- Main Content (Hidden initially) -->
+<div id="job-content" class="max-w-4xl mx-auto py-10 hidden">
+    <div class="bg-bg p-8 rounded-neu shadow-neu-out mb-8">
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h1 class="text-4xl font-bold text-primary mb-2" id="job-title">Job Title</h1>
+                <p class="text-lg text-gray-500 font-medium" id="company-info">Company • Location</p>
+            </div>
+            <div class="text-right">
+                <p class="text-3xl font-bold text-primary" id="job-pay">$0/hr</p>
+                <div class="mt-4">
+                    <button id="apply-btn" onclick="openApplyModal()"
+                        class="px-8 py-3 bg-accent text-white font-bold rounded-neu shadow-neu-btn active:shadow-neu-in transform active:translate-y-1 transition">
+                        Apply Now
+                    </button>
+                    <a href="/jobs/" class="block mt-2 text-sm text-gray-500 hover:text-primary">Back to Jobs</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex gap-4 mb-8">
+            <span class="px-4 py-2 bg-gray-200 rounded-neu text-sm font-bold text-gray-600 uppercase"
+                id="job-type">Type</span>
+            <span class="px-4 py-2 bg-gray-200 rounded-neu text-sm font-bold text-gray-600 uppercase"
+                id="job-exp">Level</span>
+        </div>
+
+        <div class="prose max-w-none text-text mb-8">
+            <h3 class="text-xl font-bold mb-4">Description</h3>
+            <p id="job-desc" class="whitespace-pre-line leading-relaxed">...</p>
+        </div>
+
+        <div>
+            <h3 class="text-xl font-bold mb-4">Required Skills</h3>
+            <div id="job-skills" class="flex flex-wrap gap-2"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Apply Modal -->
+<div id="apply-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 backdrop-blur-sm">
+    <div class="bg-bg p-8 rounded-neu shadow-neu-out max-w-lg w-full m-4">
+        <h2 class="text-2xl font-bold text-primary mb-6">Apply for this Job</h2>
+        <form id="apply-form">
+            <div class="mb-6">
+                <label class="block font-bold mb-2 ml-1 text-primary">Cover Letter</label>
+                <textarea id="cover_letter" rows="5" required
+                    class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-in outline-none focus:ring-2 focus:ring-accent/50 text-text transition placeholder-gray-400"
+                    placeholder="Why are you a good fit?"></textarea>
+            </div>
+            <div class="flex justify-end gap-4">
+                <button type="button" onclick="closeApplyModal()"
+                    class="px-6 py-2 text-gray-500 font-bold hover:text-primary">Cancel</button>
+                <button type="submit" id="confirm-apply-btn"
+                    class="px-8 py-2 bg-accent text-white font-bold rounded-neu shadow-neu-btn active:shadow-neu-in transform active:translate-y-1 transition">
+                    Submit Application
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const jobId = window.location.pathname.split('/')[2];
+
+    document.addEventListener('DOMContentLoaded', loadJobDetails);
+
+    async function loadJobDetails() {
+        try {
+            const res = await fetch(`/api/jobs/${jobId}/`);
+            if (!res.ok) throw new Error("Job not found");
+            const job = await res.json();
+
+            // Populate Data
+            document.getElementById('job-title').innerText = job.title;
+            // job.recruiter might be an ID or object depending on serializer. Assuming object or expanding recruiter name if possible
+            // For MVP, just use recruiter ID or email if name not available
+            document.getElementById('company-info').innerText = `${job.location || 'Remote'}`;
+            document.getElementById('job-pay').innerText = `$${job.pay_per_hour}/hr`;
+            document.getElementById('job-type').innerText = job.job_type.replace('_', ' ');
+            document.getElementById('job-exp').innerText = job.experience_level;
+            document.getElementById('job-desc').innerText = job.description;
+
+            const skillsContainer = document.getElementById('job-skills');
+            skillsContainer.innerHTML = (job.required_skills || []).map(s =>
+                `<span class="px-3 py-1 border border-accent text-accent rounded-full text-sm font-medium">${s}</span>`
+            ).join('');
+
+            // Hide loading, show content
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('job-content').classList.remove('hidden');
+
+            // Handle Recruiter View
+            if (window.checkSession()) {
+                const user = window.getUser();
+                if (user && user.user_type === 'recruiter') {
+                    const btn = document.getElementById('apply-btn');
+                    btn.disabled = true;
+                    btn.innerText = 'Recruiters cannot apply';
+                    btn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
+                    btn.classList.remove('bg-accent', 'shadow-neu-btn', 'active:shadow-neu-in');
+                    btn.onclick = null;
+                } else {
+                    // Check if already applied (Optional UX enhancement)
+                    checkApplicationStatus(jobId);
+                }
+            }
+
+        } catch (e) {
+            document.getElementById('loading').innerHTML = '<p class="text-red-500 font-bold">Job not found.</p>';
+        }
+    }
+
+    async function checkApplicationStatus(id) {
+        if (!window.checkSession()) return;
+        // This requires an endpoint to check specific job application or filtering my applications
+        // Skipping for MVP critical path to save complexity, relying on Apply error handling
+    }
+
+    function openApplyModal() {
+        if (!window.checkSession()) {
+            window.showToast("Please login to apply.", 'error');
+            setTimeout(() => window.location.href = '/login/', 1500);
+            return;
+        }
+        document.getElementById('apply-modal').classList.remove('hidden');
+        document.getElementById('apply-modal').classList.add('flex');
+    }
+
+    function closeApplyModal() {
+        document.getElementById('apply-modal').classList.add('hidden');
+        document.getElementById('apply-modal').classList.remove('flex');
+    }
+
+    document.getElementById('apply-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('confirm-apply-btn');
+        btn.disabled = true;
+        btn.innerText = 'Applying...';
+
+        const coverLetter = document.getElementById('cover_letter').value;
+        const token = window.getAccessToken();
+
+        try {
+            const res = await fetch(`/api/jobs/${jobId}/apply/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ cover_letter: coverLetter })
+            });
+
+            if (res.ok) {
+                window.showToast("Application submitted successfully!", 'success');
+                closeApplyModal();
+                document.getElementById('apply-btn').innerText = 'Applied';
+                document.getElementById('apply-btn').disabled = true;
+                document.getElementById('apply-btn').classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                const data = await res.json();
+                window.showToast(data.message || "Failed to apply.", 'error');
+            }
+        } catch (e) {
+            window.showToast("An error occurred.", 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerText = 'Submit Application';
+        }
+    });
+</script>
+{% endblock %}

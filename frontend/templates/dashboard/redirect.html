@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex justify-center items-center min-h-[50vh]">
+    <div class="text-center">
+        <div class="animate-spin text-4xl text-accent mb-4">↻</div>
+        <p class="text-lg font-medium text-text">Redirecting to your dashboard...</p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const user = window.getUser();
+        if (!user) {
+            window.location.href = '/login/';
+        } else if (user.user_type === 'recruiter') {
+            window.location.href = '/dashboard/recruiter/';
+        } else {
+            window.location.href = '/dashboard/freelancer/';
+        }
+    });
+</script>
+{% endblock %}

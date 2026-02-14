@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="h-[calc(100vh-8rem)] max-w-7xl mx-auto py-6 px-4">
+    <div class="bg-bg rounded-neu shadow-neu-out h-full flex overflow-hidden">
+
+        <!-- Sidebar: Conversations -->
+        <div class="w-full md:w-1/3 border-r border-gray-200 flex flex-col">
+            <div class="p-4 border-b border-gray-200 bg-gray-50">
+                <h2 class="text-xl font-bold text-primary">Messages</h2>
+            </div>
+
+            <div id="conversations-list" class="flex-1 overflow-y-auto p-2 space-y-2">
+                <div class="text-center py-10 text-gray-400">Loading conversations...</div>
+            </div>
+        </div>
+
+        <!-- Main: Chat Window -->
+        <div class="hidden md:flex flex-col w-full md:w-2/3 bg-white" id="chat-window">
+
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 shadow-sm z-10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-accent text-white flex items-center justify-center font-bold text-lg shadow-neu-out"
+                        id="chat-header-avatar">?</div>
+                    <div>
+                        <h3 class="font-bold text-primary" id="chat-header-name">Select a conversation</h3>
+                        <p class="text-xs text-green-500 font-bold hidden" id="chat-header-status">● Online</p>
+                    </div>
+                </div>
+                <button id="back-to-list" class="md:hidden text-accent font-bold">Back</button>
+            </div>
+
+            <!-- Messages Area -->
+            <div id="messages-container" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+                <div class="h-full flex flex-col items-center justify-center text-gray-400">
+                    <span class="text-6xl mb-4">💬</span>
+                    <p>Select a conversation to start chatting</p>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-4 bg-white border-t border-gray-200">
+                <form id="message-form" class="flex gap-4">
+                    <input type="text" id="message-input" disabled
+                        class="flex-1 px-4 py-3 bg-gray-100 rounded-full outline-none focus:ring-2 focus:ring-accent/50 text-text transition placeholder-gray-400"
+                        placeholder="Type a message...">
+                    <button type="submit" id="send-btn" disabled
+                        class="w-12 h-12 bg-accent text-white rounded-full flex items-center justify-center shadow-neu-btn active:shadow-neu-in transform active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        ➤
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/chat.js"></script>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-10">
+    <div class="flex flex-col md:flex-row gap-8">
+
+        <!-- Filters Sidebar -->
+        <aside class="w-full md:w-1/4">
+            <div class="bg-bg p-6 rounded-neu shadow-neu-out sticky top-24">
+                <h3 class="font-bold text-xl mb-6 text-primary">Filters</h3>
+
+                <form id="filter-form" class="space-y-6">
+                    <!-- Search -->
+                    <div>
+                        <label class="block text-sm font-bold mb-2 ml-1 text-primary">Keywod</label>
+                        <input type="text" id="search" placeholder="Job title, skills..."
+                            class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-in outline-none focus:ring-1 focus:ring-accent/50 text-text transition placeholder-gray-400">
+                    </div>
+
+                    <!-- Job Type -->
+                    <div>
+                        <label class="block text-sm font-bold mb-2 ml-1 text-primary">Job Type</label>
+                        <select id="job_type"
+                            class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-out outline-none focus:ring-1 focus:ring-accent/50 text-text transition appearance-none">
+                            <option value="">Any Type</option>
+                            <option value="full_time">Full Time</option>
+                            <option value="part_time">Part Time</option>
+                            <option value="contract">Contract</option>
+                            <option value="freelance">Freelance</option>
+                        </select>
+                    </div>
+
+                    <!-- Experience Level -->
+                    <div>
+                        <label class="block text-sm font-bold mb-2 ml-1 text-primary">Experience</label>
+                        <select id="experience_level"
+                            class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-out outline-none focus:ring-1 focus:ring-accent/50 text-text transition appearance-none">
+                            <option value="">Any Level</option>
+                            <option value="junior">Junior</option>
+                            <option value="mid">Mid-Level</option>
+                            <option value="senior">Senior</option>
+                        </select>
+                    </div>
+
+                    <!-- Hourly Rate -->
+                    <div>
+                        <label class="block text-sm font-bold mb-2 ml-1 text-primary">Min Hourly Rate ($)</label>
+                        <input type="number" id="pay_per_hour_min" placeholder="e.g. 20"
+                            class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-in outline-none focus:ring-1 focus:ring-accent/50 text-text transition placeholder-gray-400">
+                    </div>
+
+                    <!-- Sort By -->
+                    <div>
+                        <label class="block text-sm font-bold mb-2 ml-1 text-primary">Sort By</label>
+                        <select id="ordering"
+                            class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-out outline-none focus:ring-1 focus:ring-accent/50 text-text transition appearance-none">
+                            <option value="-created_at">Newest First</option>
+                            <option value="-pay_per_hour">Highest Pay</option>
+                            <option value="experience_level">Experience Level</option>
+                        </select>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full py-3 bg-accent text-white font-bold rounded-neu shadow-neu-btn active:shadow-neu-in transform active:translate-y-1 transition">
+                        Apply Filters
+                    </button>
+                    <button type="button" id="clear-filters"
+                        class="w-full py-2 text-sm text-gray-500 hover:text-accent font-medium mt-2">
+                        Clear All
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="w-full md:w-3/4">
+            <h1 class="text-3xl font-bold text-primary mb-8">Browse Jobs</h1>
+
+            <div id="jobs-container" class="grid gap-6">
+                <!-- Job Cards will be injected here -->
+                <div class="p-8 text-center text-gray-400">
+                    <span class="animate-spin inline-block mr-2">↻</span> Loading jobs...
+                </div>
+            </div>
+
+            <!-- Pagination (Simple Previous/Next) -->
+            <div class="flex justify-center gap-4 mt-10" id="pagination-controls">
+                <button id="prev-page" disabled
+                    class="px-4 py-2 bg-bg rounded-neu shadow-neu-out disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
+                <span id="page-info" class="self-center font-bold text-gray-500">Page 1</span>
+                <button id="next-page" disabled
+                    class="px-4 py-2 bg-bg rounded-neu shadow-neu-out disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="/static/js/jobs.js"></script>
+{% endblock %}

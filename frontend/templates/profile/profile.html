@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-10">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-primary">Edit Profile</h1>
+            <p class="text-sm text-gray-500 mt-1">Update your professional details and portfolio</p>
+        </div>
+        <button onclick="saveProfile()" id="save-btn"
+            class="px-6 py-3 bg-accent text-white font-bold rounded-neu shadow-neu-btn active:shadow-neu-in transform active:translate-y-1 transition flex items-center gap-2">
+            <span>Save Changes</span>
+        </button>
+    </div>
+
+    <div class="bg-bg p-8 rounded-neu shadow-neu-out">
+        <form id="profile-form" class="grid md:grid-cols-12 gap-8">
+
+            <!-- Left Column: Basic Info & Image -->
+            <div class="md:col-span-4 space-y-6">
+                <!-- Profile Image Placeholder -->
+                <div class="flex flex-col items-center justify-center p-6 bg-bg rounded-neu shadow-neu-in">
+                    <div
+                        class="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center text-4xl text-gray-400 mb-4 shadow-neu-out">
+                        <span id="profile-initials">?</span>
+                    </div>
+                    <button type="button" class="text-xs text-accent font-bold hover:underline">Change Photo</button>
+                    <!-- Input hidden for now -->
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-2 ml-1 text-primary">Hourly Rate ($)</label>
+                    <input type="number" id="hourly_rate"
+                        class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-in outline-none focus:ring-2 focus:ring-accent/50 text-text transition placeholder-gray-400"
+                        placeholder="e.g. 50">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-2 ml-1 text-primary">Years of Experience</label>
+                    <input type="number" id="years_of_experience"
+                        class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-in outline-none focus:ring-2 focus:ring-accent/50 text-text transition placeholder-gray-400"
+                        placeholder="e.g. 5">
+                </div>
+            </div>
+
+            <!-- Right Column: Details -->
+            <div class="md:col-span-8 space-y-6">
+                <div>
+                    <label class="block text-sm font-bold mb-2 ml-1 text-primary">Professional Bio</label>
+                    <textarea id="bio" rows="4"
+                        class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-in outline-none focus:ring-2 focus:ring-accent/50 text-text transition placeholder-gray-400"
+                        placeholder="Tell clients about yourself..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-2 ml-1 text-primary">Education</label>
+                    <input type="text" id="education"
+                        class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-in outline-none focus:ring-2 focus:ring-accent/50 text-text transition placeholder-gray-400"
+                        placeholder="University / Degree">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold mb-2 ml-1 text-primary">Skills</label>
+                        <input type="text" id="skills"
+                            class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-in outline-none focus:ring-2 focus:ring-accent/50 text-text transition placeholder-gray-400"
+                            placeholder="Python, React, AWS (Comma separated)">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 ml-1 text-primary">Tech Stack</label>
+                        <input type="text" id="tech_stack"
+                            class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-in outline-none focus:ring-2 focus:ring-accent/50 text-text transition placeholder-gray-400"
+                            placeholder="Django, Docker (Comma separated)">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold mb-2 ml-1 text-primary">Portfolio URL</label>
+                        <input type="url" id="portfolio_url"
+                            class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-in outline-none focus:ring-2 focus:ring-accent/50 text-text transition placeholder-gray-400"
+                            placeholder="https://myportfolio.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 ml-1 text-primary">LinkedIn URL</label>
+                        <input type="url" id="linkedin_url"
+                            class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-in outline-none focus:ring-2 focus:ring-accent/50 text-text transition placeholder-gray-400"
+                            placeholder="https://linkedin.com/in/me">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    async function loadProfile() {
+        if (!window.checkSession()) return;
+
+        const user = window.getUser();
+        if (user && user.user_type === 'recruiter') {
+            window.showToast("Recruiters do not have a public profile yet.", 'error');
+            setTimeout(() => window.location.href = '/dashboard/', 2000);
+            return;
+        }
+
+        document.getElementById('profile-initials').innerText = user.email ? user.email.substring(0, 2).toUpperCase() : '?';
+
+        try {
+            const token = window.getAccessToken();
+            const userRes = await fetch('/api/users/me/', { headers: { 'Authorization': `Bearer ${token}` } });
+
+            if (!userRes.ok) throw new Error("Failed to load profile");
+
+            const userData = await userRes.json();
+            const profile = userData.freelancer_profile || {};
+
+            // Populate Fields
+            const fields = ['bio', 'education', 'years_of_experience', 'hourly_rate', 'portfolio_url', 'linkedin_url'];
+            fields.forEach(field => {
+                const el = document.getElementById(field);
+                if (el) el.value = profile[field] || '';
+            });
+
+            // Specific handling for arrays
+            document.getElementById('skills').value = (profile.skills || []).join(', ');
+            document.getElementById('tech_stack').value = (profile.tech_stack || []).join(', ');
+
+        } catch (e) {
+            console.error('Error loading profile', e);
+            window.showToast('Failed to load profile data.', 'error');
+        }
+    }
+
+    async function saveProfile() {
+        const btn = document.getElementById('save-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="animate-spin">↻</span> Saving...';
+
+        const token = window.getAccessToken();
+
+        // Helper to parse comma-separated lists
+        const parseList = (id) => document.getElementById(id).value.split(',').map(s => s.trim()).filter(Boolean);
+
+        const data = {
+            bio: document.getElementById('bio').value,
+            education: document.getElementById('education').value,
+            years_of_experience: document.getElementById('years_of_experience').value || 0,
+            hourly_rate: document.getElementById('hourly_rate').value || 0,
+            portfolio_url: document.getElementById('portfolio_url').value,
+            linkedin_url: document.getElementById('linkedin_url').value,
+            skills: parseList('skills'),
+            tech_stack: parseList('tech_stack'),
+        };
+
+        try {
+            const res = await fetch('/api/users/profile/', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                window.showToast('Profile updated successfully!', 'success');
+                // Optional: Update local user object if needed
+            } else {
+                window.showToast('Failed to update profile.', 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            window.showToast('Error updating profile.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<span>Save Changes</span>';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadProfile);
+</script>
+{% endblock %}

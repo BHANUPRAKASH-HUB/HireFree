@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex justify-center items-center min-h-[85vh] py-10">
+    <div class="w-full max-w-md bg-bg rounded-neu shadow-neu-out p-10 transform transition hover:scale-[1.01]">
+        <h2 class="text-3xl font-bold text-center mb-8 text-primary">Create Account</h2>
+
+        <form id="register-form" class="space-y-6">
+            <div class="flex gap-4">
+                <div class="w-1/2">
+                    <label class="block text-sm font-bold mb-2 ml-1 text-primary">First Name</label>
+                    <input type="text" id="first_name"
+                        class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-in outline-none focus:ring-2 focus:ring-accent/50 text-text placeholder-gray-400 transition"
+                        placeholder="John" required>
+                </div>
+                <div class="w-1/2">
+                    <label class="block text-sm font-bold mb-2 ml-1 text-primary">Last Name</label>
+                    <input type="text" id="last_name"
+                        class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-in outline-none focus:ring-2 focus:ring-accent/50 text-text placeholder-gray-400 transition"
+                        placeholder="Doe" required>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold mb-2 ml-1 text-primary">Email Address</label>
+                <input type="email" id="email"
+                    class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-in outline-none focus:ring-2 focus:ring-accent/50 text-text placeholder-gray-400 transition"
+                    placeholder="you@example.com" required>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold mb-2 ml-1 text-primary">Password</label>
+                <input type="password" id="password"
+                    class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-in outline-none focus:ring-2 focus:ring-accent/50 text-text placeholder-gray-400 transition"
+                    placeholder="••••••••" required>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold mb-2 ml-1 text-primary">I want to...</label>
+                <div class="flex gap-4">
+                    <label class="flex-1 cursor-pointer group">
+                        <input type="radio" name="user_type" value="freelancer" class="peer hidden" checked>
+                        <div
+                            class="py-3 text-center bg-bg rounded-neu shadow-neu-out peer-checked:shadow-neu-in peer-checked:text-accent font-bold transition group-hover:text-accent">
+                            Find Work
+                        </div>
+                    </label>
+                    <label class="flex-1 cursor-pointer group">
+                        <input type="radio" name="user_type" value="recruiter" class="peer hidden">
+                        <div
+                            class="py-3 text-center bg-bg rounded-neu shadow-neu-out peer-checked:shadow-neu-in peer-checked:text-accent font-bold transition group-hover:text-accent">
+                            Hire Talent
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" id="register-btn"
+                class="w-full py-3 bg-bg text-accent font-bold rounded-neu shadow-neu-out hover:text-white hover:bg-accent transition transform active:shadow-neu-in flex justify-center items-center gap-2">
+                Sign Up
+            </button>
+        </form>
+
+        <div class="text-center mt-8">
+            <p class="text-sm text-primary">Already have an account?
+                <a href="/login/" class="text-accent font-bold hover:underline">Log In</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('register-btn');
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const firstName = document.getElementById('first_name').value;
+        const lastName = document.getElementById('last_name').value;
+        const userType = document.querySelector('input[name="user_type"]:checked').value;
+
+        // Loading State
+        btn.disabled = true;
+        btn.innerHTML = '<span class="animate-spin">↻</span> Creating Account...';
+
+        try {
+            const response = await fetch('/api/auth/register/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email,
+                    password,
+                    user_type: userType,
+                    first_name: firstName,
+                    last_name: lastName
+                })
+            });
+
+            if (response.ok) {
+                window.showToast('Registration successful! Redirecting to login...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/login/';
+                }, 1500);
+            } else {
+                const data = await response.json();
+                let errorMessage = 'Registration failed.';
+                if (data.email) errorMessage = data.email[0];
+                else if (data.password) errorMessage = data.password[0];
+
+                window.showToast(errorMessage, 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            window.showToast('An error occurred. Please try again.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerText = 'Sign Up';
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-10">
+    <div class="flex flex-col md:flex-row gap-8">
+
+        <!-- Filters Sidebar -->
+        <aside class="w-full md:w-1/4">
+            <div class="bg-bg p-6 rounded-neu shadow-neu-out sticky top-24">
+                <h3 class="font-bold text-xl mb-6 text-primary">Filter Talent</h3>
+
+                <form id="talent-filter-form" class="space-y-6">
+                    <!-- Skills -->
+                    <div>
+                        <label class="block text-sm font-bold mb-2 ml-1 text-primary">Skills</label>
+                        <input type="text" id="skills_filter" placeholder="e.g. Python"
+                            class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-in outline-none focus:ring-1 focus:ring-accent/50 text-text transition placeholder-gray-400">
+                    </div>
+
+                    <!-- Hourly Rate -->
+                    <div>
+                        <label class="block text-sm font-bold mb-2 ml-1 text-primary">Max Hourly Rate</label>
+                        <input type="number" id="hourly_rate_max" placeholder="e.g. 100"
+                            class="w-full px-4 py-3 bg-bg rounded-neu shadow-neu-in outline-none focus:ring-1 focus:ring-accent/50 text-text transition placeholder-gray-400">
+                    </div>
+
+                    <button type="submit"
+                        class="w-full py-3 bg-accent text-white font-bold rounded-neu shadow-neu-btn active:shadow-neu-in transform active:translate-y-1 transition">
+                        Find Talent
+                    </button>
+                    <button type="button" id="clear-talent-filters"
+                        class="w-full py-2 text-sm text-gray-500 hover:text-accent font-medium mt-2">
+                        Clear All
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="w-full md:w-3/4">
+            <h1 class="text-3xl font-bold text-primary mb-8">Discover Freelancers</h1>
+
+            <div id="talent-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Talent Cards Will be injected here -->
+                <div class="col-span-2 p-8 text-center text-gray-400">
+                    <span class="animate-spin inline-block mr-2">↻</span> Loading talent...
+                </div>
+            </div>
+
+            <div class="flex justify-center gap-4 mt-10" id="pagination-controls">
+                <button id="prev-page" disabled
+                    class="px-4 py-2 bg-bg rounded-neu shadow-neu-out disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
+                <span id="page-info" class="self-center font-bold text-gray-500">Page 1</span>
+                <button id="next-page" disabled
+                    class="px-4 py-2 bg-bg rounded-neu shadow-neu-out disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="/static/js/talent.js"></script>
+{% endblock %}
